@@ -1,0 +1,390 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: this template is creating a vpc and 4 subnets, an internet gateway, NAT gateway and security group
+Parameters: 
+  VpcCidr:
+    Description: this is the cidrblock of our vpc
+    Type: String
+    Default: "10.0.0.0/16"
+  PublicSubnet1Cidr:
+    Description: This is the cidr block of our public subnet 1
+    Type: String
+    Default: "10.0.0.0/20"
+  PublicSubnet2Cidr:
+    Description: this is the public subnet 2 cidr block
+    Type: String
+    Default: "10.0.16.0/20"
+  PrivateSubnet1Cidr:
+    Description: this is the private subnet 1 cidr block
+    Type: String
+    Default: "10.0.32.0/20"
+  PrivateSubnet2Cidr:
+    Description: this is the private subnet 2 cidr block
+    Type: String
+    Default: "10.0.48.0/20"
+  PrivateSubnet3Cidr:
+    Description: this is the private subnet 3 cidr block
+    Type: String
+    Default: "10.0.64.0/20"
+  PrivateSubnet4Cidr:
+    Description: this is the private subnet 4 cidr block
+    Type: String
+    Default: "10.0.80.0/20"
+  # SecurityGroupPorts:
+  #   Description: Simple Description of a Number Parameter, with MinValue and MaxValue
+  #   Type: Number
+  #   AllowedValues: 
+  #     - 443
+  #     - 22   
+  #     - 3306
+Resources: 
+  Group2Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr 
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: Group2Vpc
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: 
+        Fn::Select: 
+          - 0
+          - Fn::GetAZs:
+              !Ref AWS::Region
+      VpcId: !Ref Group2Vpc
+      CidrBlock: !Ref PublicSubnet1Cidr
+      Tags:
+        - Key: Name
+          Value: PublicSubnet1
+  Publicsubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select: 
+          - 1
+          - Fn::GetAZs:
+              !Ref AWS::Region
+      VpcId: !Ref Group2Vpc
+      CidrBlock: !Ref PublicSubnet2Cidr
+      Tags:
+        - Key: Name
+          Value: PublicSubnet2
+  Privatesubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select: 
+          - 0
+          - Fn::GetAZs:
+              !Ref AWS::Region 
+      VpcId: !Ref Group2Vpc
+      CidrBlock: !Ref PrivateSubnet1Cidr
+      Tags:
+        - Key: Name
+          Value: PrivateSubnet1
+  Privatesubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select: 
+          - 0
+          - Fn::GetAZs:
+              !Ref AWS::Region 
+      VpcId: !Ref Group2Vpc
+      CidrBlock: !Ref PrivateSubnet2Cidr
+      Tags:
+        - Key: Name
+          Value: PrivateSubnet2
+  Privatesubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select: 
+          - 1
+          - Fn::GetAZs:
+              !Ref AWS::Region 
+      VpcId: !Ref Group2Vpc
+      CidrBlock: !Ref PrivateSubnet3Cidr
+      Tags:
+        - Key: Name
+          Value: PrivateSubnet3
+  Privatesubnet4:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select: 
+          - 1
+          - Fn::GetAZs:
+              !Ref AWS::Region 
+      VpcId: !Ref Group2Vpc
+      CidrBlock: !Ref PrivateSubnet4Cidr
+      Tags:
+        - Key: Name
+          Value: PrivateSubnet4
+  MyIgw:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: MyIgw
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Group2Vpc
+      InternetGatewayId: !Ref MyIgw
+  NAT:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+         Fn::GetAtt:
+         - EIP
+         - AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+      - Key: stack
+        Value: production
+  EIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NAT2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+         Fn::GetAtt:
+         - EIP2
+         - AllocationId
+      SubnetId: !Ref  Publicsubnet2
+      Tags:
+      - Key: stack
+        Value: production
+  EIP2:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  PublicRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Group2Vpc 
+      Tags:
+        - Key: Name
+          Value: PublicRouteTable1
+  PublicRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Group2Vpc 
+      Tags:
+        - Key: Name
+          Value: PublicRouteTable2
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Group2Vpc
+      Tags:
+        - Key: Name
+          Value: PrivateRouteTable1
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Group2Vpc
+      Tags:
+        - Key: Name
+          Value: PrivateRouteTable2
+  PrivateRouteTable3:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Group2Vpc
+      Tags:
+        - Key: Name
+          Value: PrivateRouteTable3
+  PrivateRouteTable4:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Group2Vpc
+      Tags:
+        - Key: Name
+          Value: PrivateRouteTable4
+  PublicrouteTableAsso1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable1
+  PublicrouteTableAsso2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Publicsubnet2
+      RouteTableId: !Ref PublicRouteTable2
+  PrivateRouteTableAss01:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Privatesubnet1
+      RouteTableId: !Ref PrivateRouteTable1
+  PrivateRouteTableAss02:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Privatesubnet2
+      RouteTableId: !Ref PrivateRouteTable2
+  PrivateRouteTableAss03:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Privatesubnet3
+      RouteTableId: !Ref PrivateRouteTable3
+  PrivateRouteTableAss04:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Privatesubnet4
+      RouteTableId: !Ref PrivateRouteTable4
+  PublicRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyIgw
+  PublicRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyIgw
+  # PrivateRoute1:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: NAT
+  #   Properties:
+  #     RouteTableId: !Ref PrivateRouteTable1
+  #     DestinationCidrBlock: 0.0.0.0/0
+  #     GatewayId: !Ref NAT
+  # PrivateRoute2:
+  #   Type: AWS::EC2::Route
+  #   Properties:
+  #     RouteTableId: !Ref PrivateRouteTable2
+  #     DestinationCidrBlock: 0.0.0.0/0
+  #     GatewayId: !Ref NAT
+  # PrivateRoute3:
+  #   Type: AWS::EC2::Route
+  #   Properties:
+  #     RouteTableId: !Ref PrivateRouteTable3
+  #     DestinationCidrBlock: 0.0.0.0/0
+  #     GatewayId: !Ref NAT2
+  # PrivateRoute4:
+  #   Type: AWS::EC2::Route
+  #   Properties:
+  #     RouteTableId: !Ref PrivateRouteTable4
+  #     DestinationCidrBlock: 0.0.0.0/0
+  #     GatewayId: !Ref NAT2
+  BastionHostSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: this is the security group of our bastion host
+      VpcId: !Ref Group2Vpc
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 22
+          ToPort: 22
+          IpProtocol: tcp
+          Description: SSH for Engineering department into our bastion
+      Tags:
+        - Key: Name
+          Value: BastionHostSg
+  LoadBalancerSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: this the sg for our load balancer
+      VpcId: !Ref Group2Vpc
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: tcp
+          Description: https traffic from clients to the load balancer
+      Tags:
+        - Key: Name
+          Value: LoadBalancerSg 
+  WebandAppServerSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: this is the security group of our web and app servers
+      VpcId: !Ref Group2Vpc
+      SecurityGroupIngress:
+        - SourceSecurityGroupId:
+            Fn::GetAtt:
+              - BastionHostSg
+              - GroupId
+          FromPort: 22
+          ToPort: 22
+          IpProtocol: tcp
+          Description: SSH for Engineering department into our web and app servers
+        - SourceSecurityGroupId:
+            Fn::GetAtt:
+              - LoadBalancerSg
+              - GroupId
+          FromPort: 443
+          ToPort: 443
+          IpProtocol: tcp
+          Description: https traffic from our load balancer
+      Tags:
+        - Key: Name
+          Value: WebandAppServerSg
+  DataBaseSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: this is the security group of our data base instance
+      VpcId: !Ref Group2Vpc
+      SecurityGroupIngress:
+        - SourceSecurityGroupId: 
+            Fn::GetAtt:
+              - BastionHostSg
+              - GroupId
+          FromPort: 22
+          ToPort: 22
+          IpProtocol: tcp
+          Description: SSH for Engineering department into our data base from the bastion
+        - SourceSecurityGroupId: 
+            Fn::GetAtt:
+              - WebandAppServerSg
+              - GroupId
+          FromPort: 3306
+          ToPort: 3306
+          IpProtocol: tcp
+          Description: mysql traffic coming from the web and app servers
+      Tags:
+        - Key: Name
+          Value: DataBaseSg
+Outputs:
+  BastionHostSgGroupId:
+    Description: this is the bastion security group id value
+    Value: !GetAtt 
+      - BastionHostSg
+      - GroupId
+    Export:
+      Name: BastionHostSg
+  LoadBalancerSgGroupId:
+    Description: this is the loadbalancer security group id value
+    Value: !GetAtt 
+      - LoadBalancerSg
+      - GroupId
+    Export:
+      Name: LoadBalancerSg
+  WebandAppServerSgGroupId:
+    Description: this is the web and app server security group id value
+    Value: !GetAtt 
+      - WebandAppServerSg
+      - GroupId
+    Export:
+      Name: WebandAppServerSg
+  DataBaseSgGroupId:
+    Description: this is the loadbalancer security group id value
+    Value: !GetAtt 
+      - DataBaseSg
+      - GroupId
+    Export:
+      Name: DataBaseSg
+  Group2vpc:
+    Description: The ID of the VPC
+    Value: !Ref Group2Vpc
+    Export:
+      Name: !Sub "${AWS::StackName}-VPCID"
+    
+    
