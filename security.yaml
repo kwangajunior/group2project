@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  this  Template is creating  Route53_CNAME record 
+Parameters:
+  HostedZone:
+    Type: String
+    Description: The DNS name of an existing Amazon Route 53 hosted zone
+    AllowedPattern: '(?!-)[a-zA-Z0-9-.]{1,63}(?<!-)'
+    ConstraintDescription: must be a valid DNS zone name.
+Resources:
+  MyDNSRecord:
+    Type: 'AWS::Route53::RecordSet'
+    Properties:
+      HostedZoneName: !Join 
+        - ''
+        - - !Ref HostedZone
+          - .
+      Comment: CNAME redirect to www.jrwakaman.com.
+      Name: !Join 
+        - ''
+        - - !Ref 'AWS::StackName'
+          - .
+          - !Ref 'AWS::Region'
+          - .
+          - !Ref HostedZone
+          - .
+      Type: CNAME
+      TTL: '900'
+      ResourceRecords: 
+        - secur-Appli-1L2IZAXTXLS70-1005811758.us-east-1.elb.amazonaws.com
+  # Policy:
+  #   Type: AWS::FMS::Policy
+  #   Properties:
+  #     ExcludeResourceTags: true
+  #     ResourceTags:
+  #       - Key: Name
+  #         Value: WAF
+  #     IncludeMap:
+  #       ACCOUNT:
+  #         - !Ref AWS::AccountId
+  #     PolicyName: TaggedPolicy
+  #     RemediationEnabled: false
+  #     ResourceType: ResourceTypeList
+  #     ResourceTypeList:
+  #       - AWS::AWS::ElasticLoadBalancingV2::LoadBalancer
+  #       - AWS::EC2::EIP
+  #     SecurityServicePolicyData:
+  #       Type: SHIELD_ADVANCED
+  #     DeleteAllPolicyResources: false
+  #     Tags:
+  #       - Key: tag1
+  #         Value: value
+  iamUser:
+    Type: AWS::IAM::User
+Outputs:
+  CNAME:
+    Description: Fully qualified domain name
+    Value: !Ref MyDNSRecord
