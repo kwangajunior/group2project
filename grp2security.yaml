@@ -96,9 +96,8 @@ Resources:
   BastionHost: 
     Type: AWS::EC2::Instance
     Properties: 
-      ImageId: ami-0cff7528ff583bf9a"
+      ImageId: ami-0cff7528ff583bf9a
       KeyName: !Ref KeyName
-      SubnetId: !Ref Subnets
       # SecurityGroups:
       #   - !ImportValue BastionHostSg
 Outputs:

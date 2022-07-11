@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: this is to create an RDS database using mysql engine
+Parameters:
+  DBInstanceClass:
+    Description: this is for our RDS mysql DB instance
+    Type: String
+    Default: db.t2.micro
+  DBInstanceID:
+    Default: group2instance
+    Description: My database instanceId
+    Type: String
+    MinLength: '1'
+    MaxLength: '63'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription:
+      Must begin with a letter and must not end with a hyphen or contain two
+      consecutive hyphens.
+  DBName:
+    Default: Group2DB
+    Description: My DB name
+    Type: String
+    MinLength: '1'
+    MaxLength: '64'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
+  DBUsername:
+    NoEcho: 'true'
+    Description: Username for mysql database access
+    Type: String
+    MinLength: '1'
+    MaxLength: '16'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+  DBPassword:
+    NoEcho: 'true'
+    Description: Password mysql database access
+    Type: String
+    MinLength: '8'
+    MaxLength: '41'
+    AllowedPattern: '[a-zA-Z0-9]*'
+    ConstraintDescription: must contain only alphanumeric characters.
+  DBAllocatedStorage:
+    Default: '20'
+    Description: The size of the database (GiB)
+    Type: Number
+    MinValue: '10'
+    MaxValue: '128'
+    ConstraintDescription: must be between 10 and 128 GiB.
+Resources:
+  Group2RDSMYSQL:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: !Ref DBAllocatedStorage
+      DBInstanceClass: !Ref DBInstanceClass
+      DBInstanceIdentifier: !Ref DBInstanceID
+      DBName: !Ref DBName
+      Engine: MYSQL
+      MasterUsername: !Ref  DBUsername
+      MasterUserPassword: !Ref DBPassword
